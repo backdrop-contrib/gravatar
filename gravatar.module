@@ -1,0 +1,42 @@
+<?php
+/**
+ * $Id$
+ * Gravatar integration in comments.
+ * @author Arnaud 'Narno' Ligny <arnaud.ligny@narno.com>
+ * @copyright Narno.com
+ */
+
+/**
+ * Implementation of hook_comment().
+ */
+function gravatar_comment(&$comment, $op) {
+  switch ($op) {
+    case 'view':
+      // don't override picture user
+      if (empty($comment->picture)) {
+        $email    = $comment->mail;
+        //$default  = "http://www.somewhere.com/homestar.jpg";
+        $size     = 62;
+        $grav_url  = "http://www.gravatar.com/avatar.php?gravatar_id=" . md5($email);
+        if (!empty($default)) {
+          $grav_url .= "&amp;default=" . urlencode($default);
+        }
+        if (!empty($size)) {
+          $grav_url .= "&amp;size=" . $size;
+        }
+        //$comment->picture = url($grav_url); // can't use external file for picture ?
+        $comment->comment = theme('gravatar', $grav_url, $comment->name, $comment->homepage) . $comment->comment;
+      }
+  }
+}
+
+function theme_gravatar($grav_url, $name, $homepage) {
+  $alt = t("@user's picture", array('@user' => $name ? $name : variable_get('anonymous', t('Anonymous'))));
+  $picture = theme('image', $grav_url, $alt, $alt, '', FALSE);
+  if (!empty($homepage)) {
+    $picture = l($picture, $homepage, array('title' => t('View user website.')), NULL, NULL, FALSE, TRUE);
+  }
+  $output = "\n<div class=\"picture\">" . $picture . "</div>\n";
+  return $output;
+}
+?>

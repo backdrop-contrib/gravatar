@@ -1,0 +1,4 @@
+; $Id$
+name = "Gravatar"
+description = "Gravatar integration in comments."
+dependencies = comment
