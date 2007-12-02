@@ -32,26 +32,42 @@ function gravatar_menu($may_cache) {
 function gravatar_admin_settings() {
   $modules_path = drupal_get_path('module', 'gravatar');
   $form = array();
+  $form['gravatar_prepend'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('How to insert the Gravatar picture in comment ?')
+  );
+  $form['gravatar_prepend']['gravatar_prepend'] = array(
+    '#type' => 'radios',
+    '#default_value' => variable_get('gravatar_prepend', TRUE),
+    '#options' => array(
+      TRUE  => t('Prepend the Gravatar picture to the comment'),
+      FALSE => t('Leave it up to the theme to add (only if the theme support Gravatar)')
+    )
+  );
   $form['gravatar_rating'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Rating')
+    '#title' => t('Authorized rated')
   );
-  $form['gravatar_rating']['gravatar_rating_option'] = array(
+  $form['gravatar_rating']['gravatar_rating'] = array(
     '#type' => 'radios',
-    //'#title' => t('Rating'),
-    '#default_value' => variable_get('gravatar_rating_option', 'G'),
+    '#default_value' => variable_get('gravatar_rating', ''),
     '#options' => array(
-      'G' => theme('image', $modules_path . '/rating/g.gif', 'G', 'G', '', FALSE) . '&nbsp;' . t('rated gravatar is suitable for display on all websites with any audience type.'),
-      'PG' => theme('image', $modules_path . '/rating/pg.gif', 'PG', 'PG', '', FALSE) . '&nbsp;' . t('rated gravatars contain may contain rude gestures, provocatively dressed individuals, the lesser swear words, or mild violence.'),
-      'R' => theme('image', $modules_path . '/rating/r.gif', 'R', 'R', '', FALSE) . '&nbsp;' . t('rated gravatars may contain such things as harsh profanity, intense violence, nudity, or hard drug use.'),
-      'X' => theme('image', $modules_path . '/rating/x.gif', 'X', 'X', '', FALSE) . '&nbsp;' . t('rated gravatars may contain hardcore sexual imagery or extremely disturbing violence.')
-    ),
-    '#description' => t('Specifies the authorized rating')
+      'G'   => theme('image', $modules_path . '/rating/g.gif', 'G', 'G', '', FALSE) . '&nbsp;' . t('rated gravatar is suitable for display on all websites with any audience type'),
+      'PG'  => theme('image', $modules_path . '/rating/pg.gif', 'PG', 'PG', '', FALSE) . '&nbsp;' . t('rated gravatars contain may contain rude gestures, provocatively dressed individuals, the lesser swear words, or mild violence'),
+      'R'   => theme('image', $modules_path . '/rating/r.gif', 'R', 'R', '', FALSE) . '&nbsp;' . t('rated gravatars may contain such things as harsh profanity, intense violence, nudity, or hard drug use'),
+      'X'   => theme('image', $modules_path . '/rating/x.gif', 'X', 'X', '', FALSE) . '&nbsp;' . t('rated gravatars may contain hardcore sexual imagery or extremely disturbing violence'),
+      ''    => t('None')
+    )
   );
-  $form['gravatar_url'] = array(
+  $form['gravatar_advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced options')
+  );
+  $form['gravatar_advanced']['gravatar_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Gravatar URL'),
-    '#default_value' => variable_get('gravatar_url', GRAVATAR_URL)
+    '#default_value' => variable_get('gravatar_url', GRAVATAR_URL),
+    '#description' => t("If you are not sure don't modify this !")
   );
   return system_settings_form($form);
 }
@@ -73,7 +89,7 @@ function gravatar_comment(&$comment, $op) {
           $grav_url .= "&default=" . urlencode(url($default));
         }
         // rating
-        $rating = variable_get('gravatar_rating_option', '');
+        $rating = variable_get('gravatar_rating', '');
         if (!empty($rating)) {
           $grav_url .= "&rating=" . $rating;
         }
@@ -83,8 +99,12 @@ function gravatar_comment(&$comment, $op) {
         if (!empty($maxwidth) && (integer)$maxwidth <= GRAVATAR_MAX_SIZE) {
           $grav_url .= "&size=" . $maxwidth;
         }
-        //$comment->picture = url($grav_url); // can't use external file for picture
-        $comment->comment = theme('gravatar', $grav_url, $comment->name, $comment->homepage) . $comment->comment;
+        // set gravatar
+        $comment->gravatar = theme('gravatar', $grav_url, $comment->name, $comment->homepage);
+        // if theme dosen't support gravatar, insert picture in comment text
+        if (variable_get('gravatar_prepend', TRUE)) {
+          $comment->comment = $comment->gravatar . $comment->comment;
+        }
       }
   }
 }
