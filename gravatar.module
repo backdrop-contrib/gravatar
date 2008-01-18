@@ -76,39 +76,83 @@ function gravatar_admin_settings() {
  * Implementation of hook_comment().
  */
 function gravatar_comment(&$comment, $op) {
-  switch ($op) {
-    case 'view':
-      // check email address for anonymus user
-      // and check picture for authenticated user (don't override picture user)
-      if (!empty($comment->mail) && empty($comment->picture)) {
-        // Gravatar url
-        $grav_url  = sprintf(variable_get('gravatar_url', GRAVATAR_URL), md5($comment->mail));
-        // default picture
-        $default = variable_get('user_picture_default', '');
-        if (!empty($default)) {
-          $grav_url .= "&default=" . urlencode(url($default));
+  $comment_account = user_load(array('uid' => $comment->uid));
+  if (user_access('use gravatar', $comment_account) && $comment_account->gravatar_disabled != 1) {
+    switch ($op) {
+      case 'view':
+        // hack for authenticated users
+        if ($comment_account->uid != 0) {
+          $comment->mail = $comment_account->mail;
         }
-        // rating
-        $rating = variable_get('gravatar_rating', '');
-        if (!empty($rating)) {
-          $grav_url .= "&rating=" . $rating;
+        // check email address
+        if (!empty($comment->mail)) {
+          // Gravatar url
+          $grav_url  = sprintf(variable_get('gravatar_url', GRAVATAR_URL), md5($comment->mail));
+          // default picture
+          $default = variable_get('user_picture_default', '');
+          if (!empty($default)) {
+            $grav_url .= "&default=" . urlencode(url($default));
+          }
+          // rating
+          $rating = variable_get('gravatar_rating', '');
+          if (!empty($rating)) {
+            $grav_url .= "&rating=" . $rating;
+          }
+          // set the maximum gravatar sized
+          // get the maximum allowed user picture dimensions from user settings
+          list($maxwidth, $maxheight) = explode('x', variable_get('user_picture_dimensions', '85x85'));
+          if (!empty($maxwidth) && (integer)$maxwidth <= GRAVATAR_MAX_SIZE) {
+            $grav_url .= "&size=" . $maxwidth;
+          }
+          // set gravatar
+          $comment->gravatar = theme('gravatar', $grav_url, $comment->name, $comment->homepage);
+          // if theme dosen't support gravatar, insert picture in comment text
+          if (variable_get('gravatar_prepend', TRUE)) {
+            $comment->comment = $comment->gravatar . $comment->comment;
+          }
         }
-        // set the maximum gravatar sized
-        // get the maximum allowed user picture dimensions from user settings
-        list($maxwidth, $maxheight) = explode('x', variable_get('user_picture_dimensions', '85x85'));
-        if (!empty($maxwidth) && (integer)$maxwidth <= GRAVATAR_MAX_SIZE) {
-          $grav_url .= "&size=" . $maxwidth;
-        }
-        // set gravatar
-        $comment->gravatar = theme('gravatar', $grav_url, $comment->name, $comment->homepage);
-        // if theme dosen't support gravatar, insert picture in comment text
-        if (variable_get('gravatar_prepend', TRUE)) {
-          $comment->comment = $comment->gravatar . $comment->comment;
-        }
-      }
+      break;
+      case 'form':
+        $comment['mail']['#description'] .= '<br /><span>'. t('If you have a <a href="@gravatar-website">Gravatar</a> account, used to display your avatar.', array('@gravatar-website' => url('http://www.gravatar.com'))) .'</span>';
+        return $comment;
+      break;
+    }
   }
 }
 
+/**
+ * Implementation of hook_user()
+ */
+function gravatar_user($op, &$edit, &$account, $category = NULL) {
+  if (user_access('allow to disable gravatar')) {
+    switch ($op) {
+      case 'form':
+        if ($category == 'account') {
+          $form['gravatar'] = array(
+            '#type' => 'fieldset',
+            '#title' => t('Gravatar settings')
+          );
+          $form['gravatar']['gravatar_disabled'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Disable Gravatar'),
+            '#default_value' => $edit['gravatar_disabled'],
+            '#description' => t('If checked, do not display your Gravatar (if you have a Gravatar accout).')
+          );
+        }
+        return $form;
+      break;
+      /*
+      case 'view':
+        // set gravatar
+        $account->gravatar = theme('gravatar', $grav_url, $account->name);
+        echo '<pre>', print_r($account), '</pre>';
+      break;
+      */
+    }
+  }
+}
+
+// print Gravatar
 function theme_gravatar($grav_url, $name, $homepage) {
   $alt = t("@user's picture", array('@user' => $name ? $name : variable_get('anonymous', t('Anonymous'))));
   $picture = theme('image', $grav_url, $alt, $alt, '', FALSE);
@@ -117,5 +161,12 @@ function theme_gravatar($grav_url, $name, $homepage) {
   }
   $output = "\n<div class=\"picture\">" . $picture . "</div>\n";
   return $output;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function gravatar_perm() {
+  return array('use gravatar', 'allow to disable gravatar');
 }
 ?>
