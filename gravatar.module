@@ -79,6 +79,25 @@ function gravatar_admin_settings() {
       ''    => t('None')
     )
   );
+  if (variable_get('user_pictures', 0)) {
+    $user_picture_default     = variable_get('user_picture_default', '');
+    $user_picture_dimensions  = variable_get('user_picture_dimensions', '85x85');
+    $gravatar_pictures  = '<ul>';
+    if (!empty($user_picture_default)) {
+      $gravatar_pictures .= '  <li>'. '<img src="'. variable_get('user_picture_default', '') .'" /> ' . t("as default picture") .'</li>';
+    }
+    if (!empty($user_picture_dimensions)) {
+      $gravatar_pictures .= '  <li>'. t("Picture maximum dimensions") .' : '. variable_get('user_picture_dimensions', '85x85') . ' ' . t("pixels") .'</li>';
+    }
+    $gravatar_pictures .= '</ul>';
+    $gravatar_pictures .= '<p>'. t("You can modify this settings on <a href=\"@link\">users settings page</a>.", array('@link' => '/admin/user/settings')) .'</p>';
+    $form['gravatar_pictures'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Pictures settings'),
+      '#description' => $gravatar_pictures
+    );
+
+  }
   $form['gravatar_advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced options')
