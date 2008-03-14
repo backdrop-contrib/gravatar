@@ -1,4 +1,8 @@
 ; $Id$
-name = "Gravatar"
-description = "Gravatar integration in comments."
-dependencies = comment
+
+name = "Gravatar Integration"
+description = "Integrate gravatar pictures registered at gravatar.com in Drupal sites"
+core = 6.x
+version = 6.x-1.0
+project = "Gravatar"
+package = "3rd party integration"
