@@ -1,0 +1,9 @@
+/* $Id$ */
+
+.hide, .js-show {
+  display: none;
+}
+
+html.js .js-show {
+  display: block !important;
+}
