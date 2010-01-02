@@ -24,7 +24,7 @@ This module integrates the Gravatar service with Drupal user pictures.
 INSTALLATION
 ------------
 
-See http://drupal.org/getting-started/5/install-contrib for instructions on
+See http://drupal.org/getting-started/install-contrib for instructions on
 how to install or update Drupal modules.
 
 User picture support (admin/user/settings) must be enabled for Gravatar to
