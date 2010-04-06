@@ -12,24 +12,13 @@
 function gravatar_schema() {
   $schema['cache_gravatar'] = drupal_get_schema_unprocessed('system', 'cache');
   $schema['cache_gravatar']['description'] = t('Cache table for the Gravatar module to store already processed and cached images.');
-
   return $schema;
-}
-
-/**
- * Implementation of hook_install().
- */
-function gravatar_install() {
-  drupal_install_schema('gravatar');
 }
 
 /**
  * Implementation of hook_uninstall().
  */
 function gravatar_uninstall() {
-  // Remove tables.
-  drupal_uninstall_schema('gravatar');
-
   // Remove variables.
   drupal_load('module', 'gravatar');
   $variables = array_keys(gravatar_variables());
