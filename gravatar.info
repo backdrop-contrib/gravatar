@@ -5,3 +5,4 @@ core = 7.x
 files[] = gravatar.module
 files[] = gravatar.install
 files[] = gravatar.admin.inc
+configure = admin/config/people/gravatar

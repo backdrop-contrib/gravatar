@@ -56,8 +56,8 @@ function gravatar_requirements($phase) {
     // Warn if user pictures are not enabled in the theme.
     // @todo Stupid theme_get_settings generates errors on status report page.
     $default_theme = variable_get('theme_default', 'garland');
-    $theme_settings = theme_get_settings($default_theme);
-    if (!$theme_settings['toggle_comment_user_picture'] && !$theme_settings['toggle_node_user_picture']) {
+
+    if (!theme_get_setting('toggle_comment_user_picture', $theme = NULL) && !theme_get_setting('toggle_node_user_picture', $theme = NULL)) {
       $notifications[] = t('Make sure user pictures are enabled in your <a href="@theme-settings">theme</a> settings.', array('@theme-settings' => url('admin/build/themes/settings/' . $default_theme)));
     }
 

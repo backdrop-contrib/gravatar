@@ -11,9 +11,7 @@
  *
  * @see system_settings_form()
  */
-function gravatar_admin_settings() {
-  $form = array();
-
+function gravatar_admin_settings($form, $form_state) {
   // Display settings.
   $form['display'] = array(
     '#type'        => 'fieldset',
@@ -28,12 +26,12 @@ function gravatar_admin_settings() {
   $form['display']['gravatar_rating'] = array(
     '#type'          => 'select',
     '#title'         => t('Image maturity filter'),
-    '#description' => theme('item_list', array(
+    '#description' => theme('item_list', array('items' => array(
       t('G: Suitable for display on all websites with any audience type.'),
       t('PG: May contain rude gestures, provocatively dressed individuals, the lesser swear words, or mild violence.'),
       t('R: May contain such things as harsh profanity, intense violence, nudity, or hard drug use.'),
       t('X: May contain hardcore sexual imagery or extremely disturbing violence.'),
-    )),
+    ))),
     '#options'       => drupal_map_assoc(array('G', 'PG', 'R', 'X')),
     '#default_value' => gravatar_var('rating'),
   );
@@ -51,13 +49,13 @@ function gravatar_admin_settings() {
       GRAVATAR_DEFAULT_LOGO => t('Gravatar.com logo'),
     ),
     '#default_value' => gravatar_var('default'),
-    '#prefix' => '<div class="picture js-show">' . theme('image', '', t('Default picture example'), t('Default picture example'), array('id' => 'gravatar-imagepreview'), FALSE) . '</div>',
+    '#prefix' => '<div class="picture js-show">' . theme('image', array('path' => '', 'alt' => t('Default picture example'), 'title' => t('Default picture example'), 'attributes' => array('id' => 'gravatar-imagepreview'), 'getsize' => FALSE)) . '</div>',
     '#process' => array('form_process_radios', 'gravatar_process_default_setting'),
   );
 
   // Add JavaScript and CSS to swap the defalut image previews.
-  drupal_add_js(drupal_get_path('module', 'gravatar') . '/gravatar.js');
-  drupal_add_css(drupal_get_path('module', 'gravatar') . '/gravatar.css');
+  $form['#attached']['js'][] = drupal_get_path('module', 'gravatar') . '/gravatar.js';
+  $form['#attached']['css'][] = drupal_get_path('module', 'gravatar') . '/gravatar.css';
 
   // Advanced settings.
   $form['advanced'] = array(
@@ -86,12 +84,18 @@ function gravatar_process_default_setting($element) {
 
   foreach ($element['#options'] as $key => $choice) {
     // Add an image to preview this default image option.
-    $attributes = array(
-      'id' => 'gravatar-imagepreview-'. $key,
-      // Hide the image if the respective option is disabled.
-      'class' => $choice['#disabled'] ? 'hide' : 'js-hide',
+    $options = array(
+      'path' =>  gravatar_get_gravatar(mt_rand(), array('default' => _gravatar_get_default_image($key))),
+      'alt' => $choice,
+      'title' => $choice,
+      'attributes' => array(
+        'id' => 'gravatar-imagepreview-'. $key,
+        // Hide the image if the respective option is disabled.
+        'class' => $choice['#disabled'] ? 'hide' : 'js-hide',
+      ),
+      'getsize' => FALSE,
     );
-    $element[$key]['#suffix'] = theme('image', gravatar_get_gravatar(mt_rand(), array('default' => _gravatar_get_default_image($key))), $choice, $choice, $attributes, FALSE);
+    $element[$key]['#suffix'] = theme('image', $options);
   }
 
   return $element;
