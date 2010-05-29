@@ -49,7 +49,7 @@ function gravatar_admin_settings($form, $form_state) {
       GRAVATAR_DEFAULT_LOGO => t('Gravatar.com logo'),
     ),
     '#default_value' => gravatar_var('default'),
-    '#prefix' => '<div class="picture js-show">' . theme('image', array('path' => '', 'alt' => t('Default picture example'), 'title' => t('Default picture example'), 'attributes' => array('id' => 'gravatar-imagepreview'), 'getsize' => FALSE)) . '</div>',
+    '#field_prefix' => '<div class="picture js-show">' . theme('image', array('path' => '', 'alt' => t('Default picture example'), 'title' => t('Default picture example'), 'attributes' => array('id' => 'gravatar-imagepreview'), 'getsize' => FALSE)) . '</div>',
     '#process' => array('form_process_radios', 'gravatar_process_default_setting'),
   );
 

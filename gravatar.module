@@ -104,7 +104,7 @@ function gravatar_menu() {
  * @see template_preprocess_user_picture()
  */
 function gravatar_preprocess_user_picture(&$variables) {
-  $variables['picture'] = '';
+  $variables['user_picture'] = '';
 
   if (variable_get('user_pictures', 0)) {
     // Load the full user object since it is not provided with nodes, comments,
@@ -126,17 +126,17 @@ function gravatar_preprocess_user_picture(&$variables) {
     }
 
     if ($picture) {
-      $alt = t("@user's picture", array('@user' => $account->name));
+      $alt = t("@user's picture", array('@user' => format_username($account)));
       if (module_exists('image') && $style = variable_get('user_picture_style', '')) {
-        $variables['picture'] = theme('image_style', array('path' => $picture, 'alt' => $alt, 'title' => $alt, 'getsize' => FALSE));
+        $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'path' => $picture, 'alt' => $alt, 'title' => $alt, 'getsize' => FALSE));
       }
       else {
-        $variables['picture'] = theme('image', array('path' => $picture, 'alt' => $alt, 'title' => $alt, 'getsize' => FALSE));
+        $variables['user_picture'] = theme('image', array('path' => $picture, 'alt' => $alt, 'title' => $alt, 'getsize' => FALSE));
       }
       if ($account->uid && user_access('access user profiles')) {
         // Create link to the user's profile.
         $attributes = array('title' => t('View user profile.'));
-        $variables['picture'] = l($variables['picture'], 'user/' . $account->uid, array('attributes' => $attributes, 'html' => TRUE));
+        $variables['user_picture'] = l($variables['user_picture'], 'user/' . $account->uid, array('attributes' => $attributes, 'html' => TRUE));
       }
       elseif (!empty($account->homepage)) {
         // If user is anonymous, create link to the commenter's homepage.
@@ -144,7 +144,7 @@ function gravatar_preprocess_user_picture(&$variables) {
           'title' => t('View user website.'),
           'rel' => 'external nofollow',
         );
-        $variables['picture'] = l($variables['picture'], $account->homepage, array('attributes' => $attributes, 'html' => TRUE));
+        $variables['user_picture'] = l($variables['user_picture'], $account->homepage, array('attributes' => $attributes, 'html' => TRUE));
       }
     }
   }
