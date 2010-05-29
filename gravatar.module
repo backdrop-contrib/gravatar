@@ -258,6 +258,8 @@ function gravatar_form_user_profile_form_alter(&$form, $form_state) {
  *   An URL-encoded string with the gravatar image.
  */
 function gravatar_get_gravatar($mail, $options = array()) {
+  global $is_https;
+
   // Merge default options.
   $options += array(
     'default' => _gravatar_get_default_image(gravatar_var('default')),
@@ -279,7 +281,8 @@ function gravatar_get_gravatar($mail, $options = array()) {
   //  }
   //}
 
-  $gravatar = gravatar_var('url') . $hash;
+  $gravatar = $is_https ? variable_get('gravatar_url_ssl', GRAVATAR_URL_SSL) : variable_get('gravatar_url', GRAVATAR_URL);
+  $gravatar .= $hash;
   $gravatar .= '?d=' . urlencode($options['default']);
   $gravatar .= '&s=' . $options['size'];
   $gravatar .= '&r=' . $options['rating'];
@@ -375,7 +378,8 @@ function gravatar_variables() {
   return array(
     'gravatar_rating' => 'G',
     'gravatar_default' => GRAVATAR_DEFAULT_MODULE,
-    'gravatar_url' => 'http://www.gravatar.com/avatar/',
+    'gravatar_url' => GRAVATAR_URL,
+    'gravatar_url_ssl' => GRAVATAR_URL_SSL,
     'gravatar_cache' => 0,
     // Deleted variables set to NULL so they can be removed during uninstall.
     'gravatar_default_type' => NULL,

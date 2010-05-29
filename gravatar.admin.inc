@@ -68,7 +68,12 @@ function gravatar_admin_settings($form, $form_state) {
   $form['advanced']['gravatar_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Gravatar URL'),
-    '#default_value' => gravatar_var('url'),
+    '#default_value' => GRAVATAR_URL,
+  );
+  $form['advanced']['gravatar_url_ssl'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Gravatar secure URL'),
+    '#default_value' => GRAVATAR_URL_SSL,
   );
 
   return system_settings_form($form);
