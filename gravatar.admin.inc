@@ -90,7 +90,7 @@ function gravatar_process_default_setting($element) {
   foreach ($element['#options'] as $key => $choice) {
     // Add an image to preview this default image option.
     $options = array(
-      'path' =>  gravatar_get_gravatar(mt_rand(), array('default' => _gravatar_get_default_image($key))),
+      'path' =>  gravatar_get_gravatar(mt_rand(), array('default' => _gravatar_get_default_image($key), 'size' => 80)),
       'alt' => $choice,
       'title' => $choice,
       'attributes' => array(

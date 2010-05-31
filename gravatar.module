@@ -293,12 +293,13 @@ function gravatar_get_gravatar($mail, $options = array()) {
   //}
 
   $gravatar = $is_https ? variable_get('gravatar_url_ssl', GRAVATAR_URL_SSL) : variable_get('gravatar_url', GRAVATAR_URL);
-  $gravatar .= $hash;
-  $gravatar .= '?d=' . urlencode($options['default']);
-  $gravatar .= '&s=' . $options['size'];
-  $gravatar .= '&r=' . $options['rating'];
-
-  return $gravatar;
+  $gravatar .= $hash . '.jpg';
+  $query = array(
+    'd' => $options['default'],
+    's' => $options['size'],
+    'r' => $options['rating'],
+  );
+  return url($gravatar, array('query' => $query));
 }
 
 /**
@@ -354,6 +355,10 @@ function _gravatar_get_default_image($index) {
         break;
       case GRAVATAR_DEFAULT_LOGO:
         $default = 'default';
+        //$default = $base_url . '/' . drupal_get_path('module', 'gravatar') . '/gravatar.jpg';
+        break;
+      case 404:
+        $default = '404';
         break;
     }
     $defaults[$index] = $default;
