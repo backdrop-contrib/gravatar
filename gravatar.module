@@ -46,9 +46,20 @@ define('GRAVATAR_DEFAULT_MONSTERID', 5);
  */
 define('GRAVATAR_DEFAULT_LOGO', 6);
 
+/**
+ * The default URL for fetching Gravatars.
+ */
 define('GRAVATAR_URL', 'http://www.gravatar.com/avatar/');
 
+/**
+ * The default URL for fetching Gravatars via SSL.
+ */
 define('GRAVATAR_URL_SSL', 'https://secure.gravatar.com/avatar/');
+
+/**
+ * Maximum Gravatar image size in pixels.
+ */
+define('GRAVATAR_SIZE_MAX', 512);
 
 /**
  * Implementation of hook_permission().
@@ -299,7 +310,7 @@ function gravatar_get_gravatar($mail, $options = array()) {
 function _gravatar_get_size() {
   static $size = NULL;
   if (!isset($size)) {
-    $size = min(explode('x', variable_get('user_picture_dimensions', '85x85') . 'x512'));
+    $size = min(explode('x', variable_get('user_picture_dimensions', '85x85') . 'x' . GRAVATAR_SIZE_MAX));
   }
   return $size;
 }
