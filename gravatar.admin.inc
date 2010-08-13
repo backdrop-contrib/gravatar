@@ -20,7 +20,7 @@ function gravatar_admin_settings($form, $form_state) {
   $form['display']['gravatar_size'] = array(
     '#type'          => 'item',
     '#title'         => t('Image size'),
-    '#description'   => t('The preferred image size (maximum @max pixels). This setting can be adjusted in the <a href="@user-picture-link">user pictures settings</a>.', array('@max' => GRAVATAR_SIZE_MAX, '@user-picture-link' => url('admin/user/settings', array('fragment' => 'edit-user-picture-default')))),
+    '#description'   => t('The preferred image size (maximum @max pixels). This setting can be adjusted in the <a href="@user-picture-link">user pictures settings</a>.', array('@max' => GRAVATAR_SIZE_MAX, '@user-picture-link' => url('admin/config/people/accounts', array('fragment' => 'edit-user-picture-default')))),
     '#value'         => t('@sizex@size pixels', array('@size' => _gravatar_get_size())),
   );
   $form['display']['gravatar_rating'] = array(
@@ -80,7 +80,7 @@ function gravatar_admin_settings($form, $form_state) {
 }
 
 function gravatar_process_default_setting($element) {
-  $element[GRAVATAR_DEFAULT_GLOBAL]['#description'] = t('This setting can be adjusted in the <a href="@user-picture-link">user pictures settings</a>.', array('@user-picture-link' => url('admin/user/settings', array('fragment' => 'edit-user-picture-default'))));
+  $element[GRAVATAR_DEFAULT_GLOBAL]['#description'] = t('This setting can be adjusted in the <a href="@user-picture-link">user pictures settings</a>.', array('@user-picture-link' => url('admin/config/people/accounts', array('fragment' => 'edit-user-picture-default'))));
   // If the global user picture is empty, disable the respective option.
   if (!variable_get('user_picture_default', '')) {
     $element[GRAVATAR_DEFAULT_GLOBAL]['#disabled'] = TRUE;
