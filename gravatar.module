@@ -123,26 +123,26 @@ function gravatar_preprocess_user_picture(&$variables) {
     $account = _gravatar_load_account($variables['account']);
 
     // Decide with picture to use.
-    if (!empty($account->picture->filepath)) {
-      $picture = $account->picture->filepath;
+    if (!empty($account->picture->uri)) {
+      $filepath = $account->picture->uri;
     }
     elseif (!user_access('use gravatar', $account) || (user_access('disable own gravatar', $account) && isset($account->gravatar) && !$account->gravatar)) {
       // If the user does not have access to use gravatars or has gravatars
       // disabled for their account, use the global default image.
-      $picture = _gravatar_get_default_image(GRAVATAR_DEFAULT_GLOBAL);
+      $filepath = _gravatar_get_default_image(GRAVATAR_DEFAULT_GLOBAL);
     }
     else {
       // Otherwise, show a gravatar with the appropraite default picture.
-      $picture = gravatar_get_gravatar($account->mail);
+      $filepath = gravatar_get_gravatar($account->mail);
     }
 
-    if ($picture) {
+    if ($filepath) {
       $alt = t("@user's picture", array('@user' => format_username($account)));
-      if (module_exists('image') && $style = variable_get('user_picture_style', '')) {
-        $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'path' => $picture, 'alt' => $alt, 'title' => $alt, 'getsize' => FALSE));
+      if (module_exists('image') && file_valid_uri($filepath) && $style = variable_get('user_picture_style', '')) {
+        $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'path' => $filepath, 'alt' => $alt, 'title' => $alt, 'getsize' => FALSE));
       }
       else {
-        $variables['user_picture'] = theme('image', array('path' => $picture, 'alt' => $alt, 'title' => $alt, 'getsize' => FALSE));
+        $variables['user_picture'] = theme('image', array('path' => $filepath, 'alt' => $alt, 'title' => $alt, 'getsize' => FALSE));
       }
       if ($account->uid && user_access('access user profiles')) {
         // Create link to the user's profile.
@@ -214,8 +214,8 @@ function gravatar_email_validate($element, &$form_state) {
  * @todo Improve message shown to user.
  */
 function gravatar_form_comment_form_alter(&$form, $form_state) {
-  if (user_access('use gravatar') && isset($form['mail'])) {
-    $form['mail']['#description'] .= ' ' . t('If you have a <a href="@gravatar-website">Gravatar</a> account, used to display your avatar.', array('@gravatar-website' => url('http://www.gravatar.com')));
+  if (isset($form['author']['mail']) && user_access('use gravatar')) {
+    $form['author']['mail']['#description'] .= ' ' . t('If you have a <a href="@gravatar-website">Gravatar</a> account associated with the address you provide, it will be used to display your avatar.', array('@gravatar-website' => url('http://www.gravatar.com')));
   }
 }
 
@@ -335,7 +335,7 @@ function _gravatar_get_default_image($index) {
         $default = variable_get('user_picture_default', '');
         if ($default && !valid_url($default, TRUE)) {
           // Convert a relative global default picture URL to an absolute URL.
-          $default = $base_url . '/' . $default;
+          $default = file_create_url($default);
         }
         break;
       case GRAVATAR_DEFAULT_MODULE:
