@@ -215,7 +215,7 @@ function gravatar_email_validate($element, &$form_state) {
  */
 function gravatar_form_comment_form_alter(&$form, $form_state) {
   if (isset($form['author']['mail']) && user_access('use gravatar')) {
-    $form['author']['mail']['#description'] .= ' ' . t('If you have a <a href="@gravatar-website">Gravatar</a> account associated with the address you provide, it will be used to display your avatar.', array('@gravatar-website' => url('http://www.gravatar.com')));
+    $form['author']['mail']['#description'] .= ' ' . t('If you have a <a href="@gravatar-website">Gravatar</a> account associated with the address you provide, it will be used to display your avatar.', array('@gravatar-website' => url('http://www.gravatar.com/')));
   }
 }
 
