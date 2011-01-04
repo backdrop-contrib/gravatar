@@ -83,7 +83,7 @@ function gravatar_requirements($phase) {
     $requirements['gravatar'] = array(
       'title' => t('Gravatar'),
       'value' => t('Potential issues'),
-      'description' => theme('item_list', $notifications),
+      'description' => theme('item_list', array('items' => $notifications)),
       'severity' => REQUIREMENT_WARNING,
     );
   }
