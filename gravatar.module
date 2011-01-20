@@ -209,7 +209,7 @@ function _gravatar_load_account($account) {
       $account->uid = 0;
     }
 
-    $account = user_load($account->uid);
+    $account = $account->uid ? user_load($account->uid) : drupal_anonymous_user();
 
     // Load mail/homepage variable from an anonymous comment.
     if (!$account->uid) {
