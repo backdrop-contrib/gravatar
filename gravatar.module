@@ -167,33 +167,35 @@ function gravatar_preprocess_user_picture(&$variables) {
  *   A string with the path to the user's picture.
  */
 function _gravatar_get_account_user_picture($account) {
+  // If the user has an uploaded picture, use it first.
   if (!empty($account->picture->uri)) {
-    // If the user has an uploaded picture, use it first.
     return $account->picture->uri;
   }
+  // If the user does not have access to use gravatars or has gravatars
+  // disabled for their account, use the global default image.
   elseif (!user_access('use gravatar', $account) || (user_access('disable own gravatar', $account) && isset($account->data['gravatar']) && !$account->data['gravatar'])) {
-    // If the user does not have access to use gravatars or has gravatars
-    // disabled for their account, use the global default image.
     return variable_get('user_picture_default', '');
   }
-  else {
-    // Otherwise, show a gravatar with the appropraite default picture.
-    $mail = $account->mail;
-    $options = array();
-    if (empty($mail)) {
+  // Otherwise, show a gravatar with the appropraite default picture.
+  else {  
+    // Use email 
+    if (!empty($account->mail)) {
+      return gravatar_get_gravatar($mail);
+    }
+    // Use various fallbacks to provide a unique default gravatar.
+    else {
       $options['force default'] = TRUE;
-      // Use various fallbacks to provide a unique default gravatar.
       if (!empty($account->hostname)) {
-        $mail = $account->hostname;
+        $fallback = $account->hostname;
       }
       elseif (!empty($account->homepage)) {
-        $mail = $account->homepage;
+        $fallback = $account->homepage;
       }
       else {
-        $mail = serialize($account);
+        $fallback = serialize($account);
       }
+      return gravatar_get_gravatar($fallback, $options);
     }
-    return gravatar_get_gravatar($mail, $options);
   }
 }
 
