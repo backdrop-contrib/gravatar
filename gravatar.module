@@ -180,7 +180,7 @@ function _gravatar_get_account_user_picture($account) {
   else {  
     // Use email 
     if (!empty($account->mail)) {
-      return gravatar_get_gravatar($mail);
+      return gravatar_get_gravatar($account->mail);
     }
     // Use various fallbacks to provide a unique default gravatar.
     else {
