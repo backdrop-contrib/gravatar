@@ -36,8 +36,8 @@ Credits
 -------
 
 - Ported to Backdrop CMS by [Alan Mels](https://github.com/alanmels).
-- Maintained for Drupal by Narno <http://drupal.org/user/141690> and
-  Dave Reid <http://drupal.org/user/53892>
+- Maintained for Drupal by [Arnaud Ligny](https://github.com/Narno) and
+  [Dave Reid](https://github.com/davereid).
 - Port sponsored by [AltaGrade](https://www.altagrade.com)
 
 License
