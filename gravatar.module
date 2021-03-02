@@ -4,71 +4,68 @@
  * @file
  * Integrates gravatar service for user pictures.
  *
- * @author Arnaud Ligny <http://drupal.org/user/141690>
- * @author Matthias Adler <http://drupal.org/user/123779>
- * @author Dave Reid <http://drupal.org/user/53892>
- * @link http://site.gravatar.com/site/implement
  */
 
-/**
- * Global default user picture (user.module)
- */
-define('GRAVATAR_DEFAULT_GLOBAL', 1);
+ /**
+  * Global default user picture (user.module)
+  */
+ define('GRAVATAR_DEFAULT_GLOBAL', 1);
 
-/**
- * Default image provided by the Gravatar module.
- */
-define('GRAVATAR_DEFAULT_MODULE', 2);
+ /**
+  * Default image provided by the Gravatar module.
+  */
+ define('GRAVATAR_DEFAULT_MODULE', 2);
 
-/**
- * Default transparent image provided by the Gravatar module.
- */
-define('GRAVATAR_DEFAULT_MODULE_CLEAR', 7);
+ /**
+  * Default transparent image provided by the Gravatar module.
+  */
+ define('GRAVATAR_DEFAULT_MODULE_CLEAR', 7);
 
-/**
- * Generated, unique gravatar.com identicon.
- */
-define('GRAVATAR_DEFAULT_IDENTICON', 3);
+ /**
+  * Generated, unique gravatar.com identicon.
+  */
+ define('GRAVATAR_DEFAULT_IDENTICON', 3);
 
-/**
- * Generated, unique gravatar.com wavatar.
- */
-define('GRAVATAR_DEFAULT_WAVATAR', 4);
+ /**
+  * Generated, unique gravatar.com wavatar.
+  */
+ define('GRAVATAR_DEFAULT_WAVATAR', 4);
 
-/**
- * Generated, unique gravatar.com monster id.
- */
-define('GRAVATAR_DEFAULT_MONSTERID', 5);
+ /**
+  * Generated, unique gravatar.com monster id.
+  */
+ define('GRAVATAR_DEFAULT_MONSTERID', 5);
 
-/**
- * Gravatar.com logo.
- */
-define('GRAVATAR_DEFAULT_LOGO', 6);
+ /**
+  * Gravatar.com logo.
+  */
+ define('GRAVATAR_DEFAULT_LOGO', 6);
 
-/**
- * Gravatar.com Mystery Man.
- */
-define('GRAVATAR_DEFAULT_MYSTERY_MAN', 'mm');
+ /**
+  * Gravatar.com Mystery Man.
+  */
+ define('GRAVATAR_DEFAULT_MYSTERY_MAN', 'mm');
 
-/**
- * Gravatar.com retro 8-bit faces.
- */
-define('GRAVATAR_DEFAULT_RETRO', 'retro');
+ /**
+  * Gravatar.com retro 8-bit faces.
+  */
+ define('GRAVATAR_DEFAULT_RETRO', 'retro');
 
-/**
- * The default URL for fetching Gravatars.
- */
-define('GRAVATAR_URL', 'http://www.gravatar.com/avatar/');
+ /**
+  * The default URL for fetching Gravatars.
+  */
+ define('GRAVATAR_URL', 'http://www.gravatar.com/avatar/');
 
-/**
- * The default URL for fetching Gravatars via SSL.
- */
-define('GRAVATAR_URL_SSL', 'https://secure.gravatar.com/avatar/');
+ /**
+  * The default URL for fetching Gravatars via SSL.
+  */
+ define('GRAVATAR_URL_SSL', 'https://secure.gravatar.com/avatar/');
 
-/**
- * Maximum Gravatar image size in pixels.
- */
-define('GRAVATAR_SIZE_MAX', 512);
+ /**
+  * Maximum Gravatar image size in pixels.
+  */
+ define('GRAVATAR_SIZE_MAX', 512);
+
 
 /**
  * Implements hook_permission().
@@ -88,27 +85,13 @@ function gravatar_permission() {
 }
 
 /**
- * Implements hook_help().
- */
-function gravatar_help($path, $arg) {
-  switch ($path) {
-    //case 'admin/help#gravatar':
-    case 'admin/config/people/gravatar':
-    case 'admin/config/people/settings':
-      module_load_install('gravatar');
-      gravatar_check_requirements();
-      break;
-  }
-}
-
-/**
  * Implements hook_menu().
  */
 function gravatar_menu() {
   $items['admin/config/people/gravatar'] = array(
     'title' => 'Gravatar',
     'description' => 'Administer Gravatar integration.',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('gravatar_admin_settings'),
     'access arguments' => array('administer gravatar'),
     'file' => 'gravatar.admin.inc',
@@ -125,17 +108,18 @@ function gravatar_menu() {
  * @see _gravatar_get_account_user_picture()
  */
 function gravatar_preprocess_user_picture(&$variables) {
+  $config = config('gravatar.settings');
   $variables['user_picture'] = '';
 
-  if (variable_get('user_pictures', 0)) {
+  if (config_get('system.core', 'user_pictures')) {
     // Load the full user object since it is not provided with nodes, comments,
     // or views displays.
     $account = _gravatar_load_account($variables['account']);
     $filepath = _gravatar_get_account_user_picture($account);
 
     if (!empty($filepath)) {
-      $alt = t("@user's picture", array('@user' => format_username($account)));
-      if (module_exists('image') && file_valid_uri($filepath) && $style = variable_get('user_picture_style', '')) {
+      $alt = t("@user's picture", array('@user' => user_format_name($account)));
+      if (module_exists('image') && file_valid_uri($filepath) && $style = config_get('system.core', 'user_picture_style')) {
         $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'path' => $filepath, 'alt' => $alt, 'title' => $alt));
       }
       else {
@@ -174,11 +158,11 @@ function _gravatar_get_account_user_picture($account) {
   // If the user does not have access to use gravatars or has gravatars
   // disabled for their account, use the global default image.
   elseif (!user_access('use gravatar', $account) || (user_access('disable own gravatar', $account) && isset($account->data['gravatar']) && !$account->data['gravatar'])) {
-    return variable_get('user_picture_default', '');
+    return config_get('system.core', 'user_picture_default');
   }
   // Otherwise, show a gravatar with the appropraite default picture.
-  else {  
-    // Use email 
+  else {
+    // Use email
     if (!empty($account->mail)) {
       return gravatar_get_gravatar($account->mail);
     }
@@ -210,7 +194,7 @@ function _gravatar_load_account($account) {
       $account->uid = 0;
     }
 
-    $account = $account->uid ? user_load($account->uid) : drupal_anonymous_user();
+    $account = $account->uid ? user_load($account->uid) : backdrop_anonymous_user();
 
     // Load mail/homepage variable from an anonymous comment.
     if (!$account->uid) {
@@ -236,7 +220,7 @@ function _gravatar_load_account($account) {
  * @todo Improve message shown to user.
  */
 function gravatar_form_comment_form_alter(&$form, $form_state) {
-  if (isset($form['author']['mail']) && !empty($form['is_anonymous']['#value']) && user_access('use gravatar', drupal_anonymous_user())) {
+  if (isset($form['author']['mail']) && !empty($form['is_anonymous']['#value']) && user_access('use gravatar', backdrop_anonymous_user())) {
     $form['author']['mail']['#description'] .= ' ' . t('If you have a <a href="@gravatar-website">Gravatar</a> account associated with the e-mail address you provide, it will be used to display your avatar.', array('@gravatar-website' => url('http://www.gravatar.com/')));
   }
 }
@@ -247,7 +231,7 @@ function gravatar_form_comment_form_alter(&$form, $form_state) {
  * @todo Improve message shown to user.
  */
 function gravatar_form_user_profile_form_alter(&$form, $form_state) {
-  if ($form['#user_category'] == 'account' && isset($form['picture']) && variable_get('user_pictures', 0) && ($account = $form['#user']) && user_access('use gravatar', $account)) {
+  if (isset($form['picture']) && config_get('system.core', 'user_pictures') && ($account = $form['#user']) && user_access('use gravatar', $account)) {
     // Add the default user picture preview.
     if (!isset($form['picture']['picture_current']) && ($picture = theme('user_picture', array('account' => $account)))) {
       $form['picture']['picture_current'] = array(
@@ -277,10 +261,20 @@ function gravatar_form_user_profile_form_alter(&$form, $form_state) {
 /**
  * Implements hook_user_presave().
  */
-function gravatar_user_presave(&$edit, $account, $category) {
-  if (isset($edit['gravatar'])) {
-    $edit['data']['gravatar'] = $edit['gravatar'];
+function gravatar_user_presave($account) {
+  if (isset($account->gravatar)) {
+    $account->data['gravatar'] = $account->gravatar;
   }
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function gravatar_config_info() {
+  $prefixes['gravatar.settings'] = array(
+    'label' => t('Module name settings'),
+    'group' => t('Configuration'),
+  );
 }
 
 /**
@@ -307,31 +301,32 @@ function gravatar_user_presave(&$edit, $account, $category) {
  *   An URL-encoded string with the gravatar image.
  */
 function gravatar_get_gravatar($mail, $options = array()) {
+  $config = config('gravatar.settings');
   global $is_https;
 
   // Merge default options.
   $options += array(
     'default' => _gravatar_get_default_image(gravatar_var('default')),
-    'size' => min(max(0, variable_get('gravatar_size', 100)), GRAVATAR_SIZE_MAX),
-    'rating' => variable_get('gravatar_rating', 'G'),
+    'size' => min(max(0, $config->get('gravatar_size')), GRAVATAR_SIZE_MAX),
+    'rating' => $config->get('gravatar_rating'),
     'cache' => FALSE,
     'force default' => FALSE,
   );
 
-  $hash = md5(drupal_strtolower($mail));
+  $hash = md5(backdrop_strtolower($mail));
 
   // @todo Implement cache fetching.
   //if ($options['cache'] && gravatar_var('cache') && valid_email_address($mail)) {
-  //  if ($cached = cache_get($hash, 'gravatar')) {
-  //    return $cached;
-  //  }
-  //  elseif ($data = _gravatar_get_gravatar_image($mail)) {
-  //    cache_set($hash, $data, 'gravatar');
-  //    return $data;
-  //  }
+//  if ($cached = cache_get($hash, 'gravatar')) {
+//    return $cached;
+//  }
+//  elseif ($data = _gravatar_get_gravatar_image($mail)) {
+//    cache_set($hash, $data, 'gravatar');
+//    return $data;
+//  }
   //}
 
-  $gravatar = $is_https ? variable_get('gravatar_url_ssl', GRAVATAR_URL_SSL) : variable_get('gravatar_url', GRAVATAR_URL);
+  $gravatar = $is_https ? $config->get('gravatar_url_ssl') : $config->get('gravatar_url');
   $gravatar .= $hash . '.jpg';
   $query = array(
     'd' => $options['default'],
@@ -358,17 +353,17 @@ function _gravatar_get_default_image($index) {
   if (!isset($defaults[$index])) {
     switch ($index) {
       case GRAVATAR_DEFAULT_GLOBAL:
-        $default = variable_get('user_picture_default', '');
+        $default = config_get('system.core', 'user_picture_default');
         if ($default && !valid_url($default, TRUE)) {
           // Convert a relative global default picture URL to an absolute URL.
           $default = file_create_url($default);
         }
         break;
       case GRAVATAR_DEFAULT_MODULE:
-        $default = $base_url . '/' . drupal_get_path('module', 'gravatar') . '/avatar.png';
+        $default = '/' . backdrop_get_path('module', 'gravatar') . '/avatar.png';
         break;
       case GRAVATAR_DEFAULT_MODULE_CLEAR:
-        $default = $base_url . '/' . drupal_get_path('module', 'gravatar') . '/avatar-clear.png';
+        $default = '/' . backdrop_get_path('module', 'gravatar') . '/avatar-clear.png';
         break;
       case GRAVATAR_DEFAULT_IDENTICON:
         $default = 'identicon';
@@ -381,7 +376,7 @@ function _gravatar_get_default_image($index) {
         break;
       case GRAVATAR_DEFAULT_LOGO:
         $default = '';
-        //$default = $base_url . '/' . drupal_get_path('module', 'gravatar') . '/gravatar.jpg';
+        //$default = $base_url . '/' . backdrop_get_path('module', 'gravatar') . '/gravatar.jpg';
         break;
       case GRAVATAR_DEFAULT_MYSTERY_MAN:
       case GRAVATAR_DEFAULT_RETRO:
@@ -410,7 +405,7 @@ function _gravatar_get_default_image($index) {
  */
 function _gravatar_get_gravatar_image($mail) {
   $url = gravatar_get_gravatar(array('mail' => $mail, 'cache' => FALSE));
-  $request = drupal_http_request($url, array(), 'GET', NULL, 0);
+  $request = backdrop_http_request($url, array(), 'GET', NULL, 0);
   return ($request->code == '200' ? $request->data : FALSE);
 }
 
@@ -449,8 +444,17 @@ function gravatar_var($name, $default = NULL) {
 
   // @todo Remove when stable.
   if (!isset($defaults[$name])) {
-    trigger_error('Default variable for ' . drupal_placeholder($name) . ' not found.');
+    trigger_error('Default variable for ' . backdrop_placeholder($name) . ' not found.');
   }
 
+  // TODO This variable was probably removed in Backdrop without replacement.
   return variable_get($name, isset($default) || !isset($defaults[$name]) ? $default : $defaults[$name]);
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function gravatar_autoload_info() {
+  return array(
+  );
 }

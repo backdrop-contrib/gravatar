@@ -1,0 +1,12 @@
+{
+    "_config_name": "gravatar.settings",
+    "gravatar_default": "1",
+    "gravatar_size": "100",
+    "gravatar_rating": "G",
+    "gravatar_url": "http://www.gravatar.com/avatar/",
+    "gravatar_url_ssl": "https://secure.gravatar.com/avatar/",
+    "gravatar_imagedefault": "FALSE",
+    "gravatar_default_type": "4",
+    "gravatar_imagerating": "FALSE",
+    "gravatar_displaysize": "100"
+}

@@ -1,0 +1,12 @@
+[GravatarUnitTest]
+name = Gravatar functionality
+description = Test basic Gravatar functionality.
+group = Gravatar
+file = gravatar.test
+
+[GravatarFunctionalTest]
+name = Gravatar administration
+description = Test Gravatar administration.
+group = Gravatar
+file = gravatar.test
+

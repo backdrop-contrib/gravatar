@@ -1,7 +1,5 @@
 name = Gravatar
-description = "Integrate Gravatar pictures registered at Gravatar.com in Drupal sites"
-core = 7.x
-files[] = gravatar.module
-files[] = gravatar.install
-files[] = gravatar.admin.inc
+description = "Integrate Gravatar pictures registered at Gravatar.com on Backdrop sites"
+backdrop = 1.x
+type = module
 configure = admin/config/people/gravatar

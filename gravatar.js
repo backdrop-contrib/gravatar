@@ -1,7 +1,7 @@
 
 (function ($) {
 
-Drupal.behaviors.gravatarPreview = {
+Backdrop.behaviors.gravatarPreview = {
   attach: function (context) {
     $('input[name=gravatar_default]', context).once('gravatarPreview', function () {
       $(this).bind('change', function() {
